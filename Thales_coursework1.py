@@ -1,70 +1,97 @@
 import random
+import os
 
-inventory = {}
-categories = ["Electronics", "Home", "Office"]
+class Product:
+    def __init__(self, pid, name, category, brand, quantity, price):
+        self.pid = pid
+        self.name = name
+        self.category = category
+        self.brand = brand 
+        self.quantity = quantity
+        self.price = price
+    
+    def display_info(self):
+        return f"{self.pid},{self.name},{self.category},{self.brand},{self.quantity},{self.price}"
+
+class PerishableProduct(Product):
+    def __init__(self, pid, name, category, brand, quantity, price, expiry):
+        super().__init__(pid, name, category, brand, quantity, price)
+        self.expiry = expiry
+    
+    def display_info(self):
+        return super().display_info() + f",{self.expiry}"
+
+inventory_list = []
+categories = ["Electronics", "Home", "Office", "Food"]
 product_ids = set()
 
+def save_data():
+    f = open("inventory_data.txt", "w")
+    for p in inventory_list:
+        f.write(p.display_info() + "\n")
+    f.close()
+    print("Data saved.")
 
-def add_item():
-    print("\n--- Add New Item ---")
-    name = input("Enter product name: > ")
-    
-    print("Categories:", categories)
-    cat = input("Enter category: > ")
-    if cat not in categories:
-        print("Category not found, setting to General")
-        cat = "General"
-        
-    brand_name = input("Enter brand name: > ")
-    
-    brand_info = (brand_name) 
-    
-    qty = int(input("Enter quantity: > "))
-    price = float(input("Enter price: > "))
-    
-    pid = random.randint(100, 999)
-    while pid in product_ids:
-        pid = random.randint(100, 999)
-    
-    product_ids.add(pid)
-    
-    inventory[pid] = {
-        "name": name,
-        "category": cat,
-        "brand": brand_info,
-        "quantity": qty,
-        "price": price
-    }
-    print("Item added successfully!")
+def load_data():
+    if os.path.exists("inventory_data.txt"):
+        f = open("inventory_data.txt", "r")
+        for line in f:
+            data = line.strip().split(",")
+            pid = int(data[0])
+            product_ids.add(pid)
+            if len(data) == 6:
+                p = Product(pid, data[1], data[2], data[3], int(data[4]), float(data[5]))
+                inventory_list.append(p)
+            elif len(data) == 7:
+                p = PerishableProduct(pid, data[1], data[2], data[3], int(data[4]), float(data[5]), data[6])
+                inventory_list.append(p)
+        f.close()
+        print("Data loaded.")
 
-def view_inventory():
-    print("\nCurrent Inventory:")
-    print("--------------------")
-    for pid, details in inventory.items():
-        print(f"ID: {pid} | Name: {details['name']} | Price: ${details['price']}")
-        print(f"Category: {details['category']} | Qty: {details['quantity']}")
-        print("")
+def update_item():
+    pid_to_update = int(input("Enter ID to update: > "))
+    found = False
+    for p in inventory_list:
+        if p.pid == pid_to_update:
+            new_qty = int(input("Enter new quantity: > "))
+            p.quantity = new_qty
+            found = True
+            print("Updated.")
+    if not found: print("ID not found.")
 
-while True:
-    print("\nWelcome to the Inventory Management System!")
-    print("1. Add Item")
-    print("2. View Inventory")
-    print("3. Update Item")
-    print("4. Remove Item")
-    print("5. Exit")
-    
-    option = input("Select an option: > ")
+def remove_item():
+    pid_to_remove = int(input("Enter ID to remove: > "))
+    for i in range(len(inventory_list)):
+        if inventory_list[i].pid == pid_to_remove:
+            del inventory_list[i]
+            print("Removed.")
+            return
+    print("ID not found.")
 
-    if option == "1":
-        add_item()
-    elif option == "2":
-        view_inventory()
-    elif option == "3":
-        print("-")
-    elif option == "4":
-        print("-")
-    elif option == "5":
-        print("Goodbye!")
-        break
-    else:
-        print("Invalid option.")
+def main():
+    load_data()
+    while True:
+        print("\n1. Add Item\n2. View Inventory\n3. Update Item\n4. Remove Item\n5. Exit")
+        opt = input("> ")
+        if opt == "1": 
+            name = input("Name: ")
+            cat = input("Category: ")
+            brand = input("Brand: ")
+            qty = int(input("Qty: "))
+            price = float(input("Price: "))
+            pid = random.randint(100,999)
+            if cat == "Food":
+                exp = input("Expiry: ")
+                inventory_list.append(PerishableProduct(pid, name, cat, brand, qty, price, exp))
+            else:
+                inventory_list.append(Product(pid, name, cat, brand, qty, price))
+        elif opt == "2":
+            for p in inventory_list: print(p.display_info())
+        elif opt == "3": update_item()
+        elif opt == "4": remove_item()
+        elif opt == "5":
+            save_data()
+            break
+
+if __name__ == "__main__":
+    main()
