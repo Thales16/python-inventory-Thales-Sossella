@@ -1,14 +1,17 @@
 inventory = {}
 
-sample_name = "Laptop" 
-sample_qty = 5         
-sample_price = 799.99  
+categories = ["Electronics", "Home", "Office"]
 
-inventory["Laptop"] = {
-    "name": sample_name,
-    "quantity": sample_qty,
-    "price": sample_price
+product_ids = set()
+product_ids.add(101) 
+
+inventory[101] = {
+    "name": "Laptop",
+    "category": "Electronics",
+    "brand": ("Dell", "USA"), 
+    "quantity": 5,
+    "price": 799.99
 }
 
-print("System started with one sample item.")
-print(inventory)
+print("Data structures initialized.")
+print("Categories available:", categories)
