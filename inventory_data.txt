@@ -1,1 +1,2 @@
 401,chocolate,food,lindt,200,10.0
+973,banana,General,Food,200,10.0
